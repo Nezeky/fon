@@ -206,7 +206,7 @@ mod tests {
     #[test]
     fn powi() {
         for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F64] {
-            //std implementation has slightly different results across
+            // std implementation has slightly different results across
             // platforms
             for i in -16..16 {
                 assert_approx_eq_f64(Libm::powi(x, i), f64::powi(x, i));
@@ -214,7 +214,7 @@ mod tests {
         }
 
         for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F32] {
-            //std implementation has slightly different results across
+            // std implementation has slightly different results across
             // platforms
             for i in -16..16 {
                 assert_approx_eq_f32(Libm::powi(x, i), f32::powi(x, i));
