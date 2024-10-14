@@ -1,7 +1,7 @@
 // FIXME: Once remove macros, can delete
 #![allow(trivial_casts, trivial_numeric_casts)]
 
-use alloc::vec::{self, Vec};
+use alloc::{vec, vec::Vec};
 use core::{f64::consts::PI, mem};
 
 #[cfg(not(test))]
