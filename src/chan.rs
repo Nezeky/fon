@@ -58,7 +58,7 @@ pub trait Channel:
     }
 }
 
-/// 16-bit sample [Channel](Channel).
+/// 16-bit sample [`Channel`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct Ch16(i16);
@@ -76,7 +76,7 @@ impl Channel for Ch16 {
 }
 
 impl Ch16 {
-    /// Create a new 16-bit [`Channel`](Channel) value.
+    /// Create a new 16-bit [`Channel`] value.
     #[inline(always)]
     pub const fn new(value: i16) -> Self {
         Self(value)
@@ -157,7 +157,7 @@ impl Neg for Ch16 {
     }
 }
 
-/// 24-bit sample [Channel](Channel).
+/// 24-bit sample [`Channel`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 #[repr(C, packed)]
 pub struct Ch24(i16, u8);
@@ -175,7 +175,7 @@ impl Channel for Ch24 {
 }
 
 impl Ch24 {
-    /// Create a new 24-bit [`Channel`](Channel) value.
+    /// Create a new 24-bit [`Channel`] value.
     #[inline(always)]
     pub const fn new(value: i32) -> Self {
         let value = if value < -8_388_608 {
@@ -263,7 +263,7 @@ impl Neg for Ch24 {
     }
 }
 
-/// 32-bit sample [Channel](Channel).
+/// 32-bit sample [`Channel`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct Ch32(f32);
@@ -280,7 +280,7 @@ impl Channel for Ch32 {
 }
 
 impl Ch32 {
-    /// Create a new 32-bit [`Channel`](Channel) value.
+    /// Create a new 32-bit [`Channel`] value.
     #[inline(always)]
     pub const fn new(value: f32) -> Self {
         Self(value)
@@ -358,7 +358,7 @@ impl Neg for Ch32 {
     }
 }
 
-/// 64-bit sample [Channel](Channel).
+/// 64-bit sample [`Channel`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct Ch64(f64);
@@ -375,7 +375,7 @@ impl Channel for Ch64 {
 }
 
 impl Ch64 {
-    /// Create a new 64-bit [`Channel`](Channel) value.
+    /// Create a new 64-bit [`Channel`] value.
     #[inline(always)]
     pub const fn new(value: f64) -> Self {
         Self(value)
