@@ -188,7 +188,7 @@ impl<const CH: usize> Stream<CH> {
         }
 
         // Then, re-interleave the samples back.
-        sink.sink_with(&mut (0..out as usize).into_iter().map(|i| {
+        sink.sink_with(&mut (0..out as usize).map(|i| {
             let mut out_frame = Frame::<Ch, CH>::default();
             for chan in 0..CH {
                 out_frame.channels_mut()[chan] =

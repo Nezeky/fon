@@ -320,7 +320,7 @@ impl ResamplerState {
 
         let use_direct = self.filt_len * den
             <= self.filt_len * self.oversample + 8
-            && 2147483647_u64 / core::mem::size_of::<f32>() as u64 / den as u64
+            && 2147483647_u64 / size_of::<f32>() as u64 / den as u64
                 >= self.filt_len as u64;
 
         let min_sinc_table_length = if !use_direct {
@@ -380,9 +380,9 @@ fn resampler_basic_zero(
         out[out_sample as usize] = 0.0;
         out_sample += 1;
         last_sample += int_advance;
-        samp_frac_num += frac_advance as u32;
+        samp_frac_num += frac_advance;
         if samp_frac_num >= den_rate {
-            samp_frac_num -= den_rate as u32;
+            samp_frac_num -= den_rate;
             last_sample += 1
         }
     }
@@ -416,7 +416,7 @@ fn interpolate_step(
 ) {
     let mut accum: [f32; 4] = [0.; 4];
     in_slice.iter().zip(0..n).for_each(|(&curr_in, j)| {
-        let idx = (2 + (j + 1) * oversample as usize) - offset as usize;
+        let idx = (2 + (j + 1) * oversample) - offset;
         accum.iter_mut().zip(sinc_table.iter().skip(idx)).for_each(
             |(v, &s)| {
                 *v += curr_in * s;
@@ -425,7 +425,7 @@ fn interpolate_step(
     });
     let mut interp: [f32; 4] = [0.; 4];
     cubic_coef(frac, &mut interp);
-    out_slice[out_sample as usize] = interp
+    out_slice[out_sample] = interp
         .iter()
         .zip(accum.iter())
         .map(|(&x, &y)| x * y)
@@ -443,10 +443,10 @@ fn direct_step(
     let mut sum: f32 = 0.0;
     let mut j = 0;
     while j < n {
-        sum += sinc_table[j as usize] * in_slice[j as usize];
+        sum += sinc_table[j] * in_slice[j];
         j += 1
     }
-    out_slice[out_sample as usize] = sum;
+    out_slice[out_sample] = sum;
 }
 
 fn resampler_basic_interpolate(
@@ -485,7 +485,7 @@ fn resampler_basic_interpolate(
 
         out_sample += 1;
         last_sample += int_advance;
-        samp_frac_num += frac_advance as u32;
+        samp_frac_num += frac_advance;
         if samp_frac_num >= den_rate {
             samp_frac_num -= den_rate;
             last_sample += 1;
@@ -558,9 +558,9 @@ fn resampler_basic_direct(
 
         out_sample += 1;
         last_sample += int_advance;
-        samp_frac_num += frac_advance as u32;
+        samp_frac_num += frac_advance;
         if samp_frac_num >= den_rate {
-            samp_frac_num -= den_rate as u32;
+            samp_frac_num -= den_rate;
             last_sample += 1
         }
     }
@@ -596,7 +596,7 @@ fn speex_resampler_process_native(
         st, mem, in_len, out, out_len, den,
     );
     if st.last_sample < *in_len {
-        *in_len = st.last_sample as u32;
+        *in_len = st.last_sample;
     }
     *out_len = out_sample as u32;
     st.last_sample -= *in_len;
@@ -616,7 +616,7 @@ fn speex_resampler_magic(
     speex_resampler_process_native(
         st,
         &mut tmp_in_len,
-        *out,
+        out,
         &mut out_len,
         den,
     );
@@ -631,6 +631,6 @@ fn speex_resampler_magic(
             .for_each(|(x, &y)| *x = y);
     }
     let value: &mut [f32] = mem::take(out);
-    *out = &mut value[(out_len as u32) as usize..];
+    *out = &mut value[out_len as usize..];
     out_len
 }

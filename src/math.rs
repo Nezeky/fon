@@ -2,6 +2,7 @@ use core::ops::Rem;
 
 /// Floating point methods currently only available on std, that may be
 /// implemented with the libm crate as dependency of core in the future.
+#[allow(dead_code)]
 pub(crate) trait Libm: Rem<Output = Self> + Sized {
     fn sin(self) -> Self;
     fn cos(self) -> Self;
@@ -204,7 +205,7 @@ mod tests {
             }
         }
 
-        for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F32] {
+        for x in [0.0, 1.0, 1.5, -0.4, -1_000.093, 564.333_3, PI_F32] {
             // std implementation has slightly different results across
             // platforms
             for i in -16..16 {
@@ -221,7 +222,7 @@ mod tests {
             }
         }
 
-        for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F32] {
+        for x in [0.0, 1.0, 1.5, -0.4, -1_000.093, 564.333_3, PI_F32] {
             for y in [3.0, 0.0001, 100.0, -5.0, -0.00001, -250.0] {
                 assert_eq!(Libm::rem_euclid(x, y), f32::rem_euclid(x, y));
             }
@@ -233,7 +234,7 @@ mod tests {
         for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F64] {
             assert_eq!(Libm::fract(x), f64::fract(x));
         }
-        for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F32] {
+        for x in [0.0, 1.0, 1.5, -0.4, -1_000.093, 564.333_3, PI_F32] {
             assert_eq!(Libm::fract(x), f32::fract(x));
         }
     }

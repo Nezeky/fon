@@ -82,13 +82,13 @@ impl<Chan: Channel, const CH: usize> Audio<Chan, CH> {
     /// Get a slice of all audio frames.
     #[inline(always)]
     pub fn as_slice(&self) -> &[Frame<Chan, CH>] {
-        &*self.frames
+        &self.frames
     }
 
     /// Get a slice of all audio frames.
     #[inline(always)]
     pub fn as_mut_slice(&mut self) -> &mut [Frame<Chan, CH>] {
-        &mut *self.frames
+        &mut self.frames
     }
 
     /// Returns an iterator over the audio frames.

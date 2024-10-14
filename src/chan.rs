@@ -144,7 +144,7 @@ impl<R: Into<Self>> Mul<R> for Ch16 {
         let l = i32::from(self.0);
         let r = i32::from(rhs.into().0);
         let v = (l * r) / 32_767;
-        Self::new(v.max(-32_768).min(32_767) as i16)
+        Self::new(v.clamp(-32_768, 32_767) as i16)
     }
 }
 
@@ -250,7 +250,7 @@ impl<R: Into<Self>> Mul<R> for Ch24 {
         let l: i64 = i32::from(self).into();
         let r: i64 = i32::from(rhs.into()).into();
         let v = (l * r) / 8_388_607;
-        Self::new(v.max(-8_388_608).min(8_388_607) as i32)
+        Self::new(v.clamp(-8_388_608, 8_388_607) as i32)
     }
 }
 
