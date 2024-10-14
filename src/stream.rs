@@ -23,7 +23,7 @@ const WINDOW_FN_OVERSAMPLE: usize = 32;
 
 /// Stream resampler.
 #[derive(Debug)]
-pub struct Stream<const CH: usize> {
+pub struct Stream<const N: usize> {
     /// Target sample rate (constant).
     output_sample_rate: u32,
     /// Source sample rate (changeable)
@@ -36,7 +36,7 @@ pub struct Stream<const CH: usize> {
     input_latency: u32,
 }
 
-impl<const CH: usize> Stream<CH> {
+impl<const N: usize> Stream<N> {
     /// Create a new stream at target sample rate.
     pub fn new(target_hz: u32) -> Self {
         assert_ne!(target_hz, 0);
@@ -88,18 +88,18 @@ impl<const CH: usize> Stream<CH> {
     pub fn flush<S, K>(mut self, sink: K)
     where
         S: Sample,
-        K: Sink<S, CH>,
+        K: Sink<S, N>,
     {
         if self.samples[0].state.started == 0 {
             return;
         }
 
         // Generate silence.
-        for chan in 0..CH {
+        for chan in 0..N {
             self.samples[chan].input.clear();
         }
         for _ in 0..self.input_latency {
-            for chan in 0..CH {
+            for chan in 0..N {
                 self.samples[chan].input.push(0.0);
             }
         }
@@ -113,11 +113,11 @@ impl<const CH: usize> Stream<CH> {
     /// If the sink gets full, then no more audio will be written.  If there is
     /// not enough audio then the sink chooses whether or not to fill the rest
     /// of it's buffer with silence.
-    pub fn pipe<Samp, S, K>(&mut self, audio: &Audio<Samp, CH>, mut sink: K)
+    pub fn pipe<Samp, S, K>(&mut self, audio: &Audio<Samp, N>, mut sink: K)
     where
         Samp: Sample,
         S: Sample + From<Samp>,
-        K: Sink<S, CH>,
+        K: Sink<S, N>,
         Samp32: From<Samp>,
     {
         // Make sure that the sample rates match.
@@ -138,7 +138,7 @@ impl<const CH: usize> Stream<CH> {
         }
 
         // First, de-interleave input audio data into f32 buffer.
-        let converted = Audio::<Samp32, CH>::with_frames(
+        let converted = Audio::<Samp32, N>::with_frames(
             audio.sample_rate().get(),
             audio
                 .as_slice()
@@ -146,11 +146,11 @@ impl<const CH: usize> Stream<CH> {
                 .map(|frame| frame.to())
                 .collect::<Vec<_>>(),
         );
-        for chan in 0..CH {
+        for chan in 0..N {
             self.samples[chan].input.clear();
         }
         for frame in converted.iter() {
-            for chan in 0..CH {
+            for chan in 0..N {
                 self.samples[chan]
                     .input
                     .push(frame.samples()[chan].to_f32());
@@ -164,7 +164,7 @@ impl<const CH: usize> Stream<CH> {
     fn resample_audio<S, K>(&mut self, mut sink: K)
     where
         S: Sample,
-        K: Sink<S, CH>,
+        K: Sink<S, N>,
     {
         // If no input samples, skip doing the work.
         if self.samples[0].input.is_empty() {
@@ -174,7 +174,7 @@ impl<const CH: usize> Stream<CH> {
         let mut out = u32::MAX;
 
         // Allocate space for output samples and resample
-        for chan in 0..CH {
+        for chan in 0..N {
             self.samples[chan].output.resize(sink.len(), 0.0);
 
             // FIXME: Remove length parameters, return number of output samples.
@@ -189,8 +189,8 @@ impl<const CH: usize> Stream<CH> {
 
         // Then, re-interleave the samples back.
         sink.sink_with(&mut (0..out as usize).map(|i| {
-            let mut out_frame = Frame::<S, CH>::default();
-            for chan in 0..CH {
+            let mut out_frame = Frame::<S, N>::default();
+            for chan in 0..N {
                 out_frame.samples_mut()[chan] =
                     S::from(self.samples[chan].output[i]);
             }

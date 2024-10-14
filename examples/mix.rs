@@ -8,15 +8,15 @@ use fon::{
 };
 
 #[derive(Debug)]
-pub struct Mixer<'a, Samp: Sample, const CH: usize> {
+pub struct Mixer<'a, Samp: Sample, const N: usize> {
     index: usize,
-    audio: &'a mut Audio<Samp, CH>,
+    audio: &'a mut Audio<Samp, N>,
 }
 
 #[allow(single_use_lifetimes)]
-impl<'a, Samp: Sample, const CH: usize> Mixer<'a, Samp, CH> {
+impl<'a, Samp: Sample, const N: usize> Mixer<'a, Samp, N> {
     #[inline(always)]
-    fn new(audio: &'a mut Audio<Samp, CH>) -> Self {
+    fn new(audio: &'a mut Audio<Samp, N>) -> Self {
         let index = 0;
 
         Mixer { index, audio }
@@ -25,8 +25,8 @@ impl<'a, Samp: Sample, const CH: usize> Mixer<'a, Samp, CH> {
 
 // Using '_ results in reserved lifetime error.
 #[allow(single_use_lifetimes)]
-impl<'a, Samp: Sample, const CH: usize> Sink<Samp, CH>
-    for Mixer<'a, Samp, CH>
+impl<'a, Samp: Sample, const N: usize> Sink<Samp, N>
+    for Mixer<'a, Samp, N>
 {
     #[inline(always)]
     fn sample_rate(&self) -> NonZeroU32 {
@@ -39,14 +39,14 @@ impl<'a, Samp: Sample, const CH: usize> Sink<Samp, CH>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, CH>>) {
+    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, N>>) {
         let mut this = self;
-        Sink::<Samp, CH>::sink_with(&mut this, iter)
+        Sink::<Samp, N>::sink_with(&mut this, iter)
     }
 }
 
-impl<Samp: Sample, const CH: usize> Sink<Samp, CH>
-    for &mut Mixer<'_, Samp, CH>
+impl<Samp: Sample, const N: usize> Sink<Samp, N>
+    for &mut Mixer<'_, Samp, N>
 {
     #[inline(always)]
     fn sample_rate(&self) -> NonZeroU32 {
@@ -59,7 +59,7 @@ impl<Samp: Sample, const CH: usize> Sink<Samp, CH>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, CH>>) {
+    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, N>>) {
         for frame in self.audio.iter_mut().skip(self.index) {
             if let Some(other) = iter.next() {
                 for (channel, chan) in

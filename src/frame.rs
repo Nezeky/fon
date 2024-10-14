@@ -13,24 +13,24 @@ use crate::math::Libm;
 /// Frame - A number of interleaved [`Sample`]s
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Frame<Samp: Sample, const CH: usize>([Samp; CH]);
+pub struct Frame<Samp: Sample, const COUNT: usize>([Samp; COUNT]);
 
-impl<Samp: Sample, const CH: usize> Default for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Default for Frame<Samp, COUNT> {
     fn default() -> Self {
-        Frame([Samp::default(); CH])
+        Frame([Samp::default(); COUNT])
     }
 }
 
-impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     /// Get a mutable slice of the samples in this frame.
     #[inline(always)]
-    pub fn samples_mut(&mut self) -> &mut [Samp; CH] {
+    pub fn samples_mut(&mut self) -> &mut [Samp; COUNT] {
         &mut self.0
     }
 
     /// Get a slice of the samples in this frame.
     #[inline(always)]
-    pub fn samples(&self) -> &[Samp; CH] {
+    pub fn samples(&self) -> &[Samp; COUNT] {
         &self.0
     }
 
@@ -39,16 +39,16 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     /// 1.0/0.0 is straight ahead, 0.25 is right, 0.5 is back, and 0.75 is left.
     /// The algorithm used is "Constant Power Panning".
     #[inline(always)]
-    pub fn pan<C: Sample + Into<Samp>>(self, channel: C, angle: f32) -> Self {
-        match CH {
-            1 => self.pan_1(channel.into(), angle.rem_euclid(1.0)),
-            2 => self.pan_2(channel.into(), angle.rem_euclid(1.0)),
-            3 => self.pan_3(channel.into(), angle.rem_euclid(1.0)),
-            4 => self.pan_4(channel.into(), angle.rem_euclid(1.0)),
-            5 => self.pan_5(channel.into(), angle.rem_euclid(1.0)),
-            6 => self.pan_6(channel.into(), angle.rem_euclid(1.0)),
-            7 => self.pan_7(channel.into(), angle.rem_euclid(1.0)),
-            8 => self.pan_8(channel.into(), angle.rem_euclid(1.0)),
+    pub fn pan<S: Sample + Into<Samp>>(self, sample: S, angle: f32) -> Self {
+        match COUNT {
+            1 => self.pan_1(sample.into(), angle.rem_euclid(1.0)),
+            2 => self.pan_2(sample.into(), angle.rem_euclid(1.0)),
+            3 => self.pan_3(sample.into(), angle.rem_euclid(1.0)),
+            4 => self.pan_4(sample.into(), angle.rem_euclid(1.0)),
+            5 => self.pan_5(sample.into(), angle.rem_euclid(1.0)),
+            6 => self.pan_6(sample.into(), angle.rem_euclid(1.0)),
+            7 => self.pan_7(sample.into(), angle.rem_euclid(1.0)),
+            8 => self.pan_8(sample.into(), angle.rem_euclid(1.0)),
             _ => unreachable!(),
         }
     }
@@ -72,8 +72,8 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
 
     /// Convert an audio Frame to another format.
     #[inline(always)]
-    pub fn to<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
-        match CH {
+    pub fn to<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
+        match COUNT {
             1 => self.to_1(),
             2 => self.to_2(),
             3 => self.to_3(),
@@ -385,10 +385,10 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_1<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_1<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const MONO: usize = 0;
 
-        let mut frame = Frame::<C, N>::default();
+        let mut frame = Frame::<S, N>::default();
         let mono = self.0[MONO].into();
         frame.0[0] = mono;
         if N == 1 {
@@ -400,11 +400,11 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_2<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_2<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
 
-        let mut frame = Frame::<C, N>::default();
+        let mut frame = Frame::<S, N>::default();
         let left = self.0[LEFT].into();
         let right = self.0[RIGHT].into();
         if N == 1 {
@@ -419,12 +419,12 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_3<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_3<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
         const CENTER: usize = 2;
 
-        let mut frame = Frame::<C, N>::default();
+        let mut frame = Frame::<S, N>::default();
         let left = self.0[LEFT].into();
         let right = self.0[RIGHT].into();
         let center = self.0[CENTER].into();
@@ -458,7 +458,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_4<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_4<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const SURROUND_L: usize = 2;
@@ -471,7 +471,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
         let surround_r = self.0[SURROUND_R];
         // Amplitude reduction.
         let amplitude = (N as f32 / 4.0).min(1.0);
-        Frame::<C, N>::default()
+        Frame::<S, N>::default()
             .pan(front_l * amplitude.into(), -30.0 / 360.0)
             .pan(front_r * amplitude.into(), 30.0 / 360.0)
             .pan(surround_l * amplitude.into(), -110.0 / 360.0)
@@ -479,7 +479,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_5<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_5<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -494,7 +494,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
         let front = self.0[FRONT];
         // Amplitude reduction.
         let amplitude = (N as f32 / 5.0).min(1.0);
-        Frame::<C, N>::default()
+        Frame::<S, N>::default()
             .pan(front_l * amplitude.into(), -30.0 / 360.0)
             .pan(front_r * amplitude.into(), 30.0 / 360.0)
             .pan(surround_l * amplitude.into(), -110.0 / 360.0)
@@ -503,7 +503,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_6<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_6<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -520,7 +520,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
         let lfe = self.0[LFE];
         // Amplitude reduction.
         let amplitude = (N as f32 / 5.0).min(1.0);
-        let mut frame = Frame::<C, N>::default()
+        let mut frame = Frame::<S, N>::default()
             .pan(front_l * amplitude.into(), -30.0 / 360.0)
             .pan(front_r * amplitude.into(), 30.0 / 360.0)
             .pan(surround_l * amplitude.into(), -110.0 / 360.0)
@@ -536,7 +536,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_7<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_7<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -555,7 +555,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
         let back = self.0[BACK];
         // Amplitude reduction.
         let amplitude = (N as f32 / 6.0).min(1.0);
-        let mut frame = Frame::<C, N>::default()
+        let mut frame = Frame::<S, N>::default()
             .pan(front_l * amplitude.into(), -30.0 / 360.0)
             .pan(front_r * amplitude.into(), 30.0 / 360.0)
             .pan(left * amplitude.into(), -90.0 / 360.0)
@@ -572,7 +572,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
     }
 
     #[inline(always)]
-    fn to_8<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
+    fn to_8<S: Sample + From<Samp>, const N: usize>(self) -> Frame<S, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -593,7 +593,7 @@ impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
         let back_r = self.0[BACK_R];
         // Amplitude reduction.
         let amplitude = (N as f32 / 7.0).min(1.0);
-        let mut frame = Frame::<C, N>::default()
+        let mut frame = Frame::<S, N>::default()
             .pan(front_l * amplitude.into(), -30.0 / 360.0)
             .pan(front_r * amplitude.into(), 30.0 / 360.0)
             .pan(left * amplitude.into(), -90.0 / 360.0)
@@ -714,13 +714,13 @@ impl<Samp: Sample> Frame<Samp, 8> {
     }
 }
 
-impl<Samp: Sample, const CH: usize> From<f32> for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> From<f32> for Frame<Samp, COUNT> {
     fn from(rhs: f32) -> Self {
-        Frame([Samp::from(rhs); CH])
+        Frame([Samp::from(rhs); COUNT])
     }
 }
 
-impl<Samp: Sample, const CH: usize> Add for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Add for Frame<Samp, COUNT> {
     type Output = Self;
 
     #[inline(always)]
@@ -732,7 +732,7 @@ impl<Samp: Sample, const CH: usize> Add for Frame<Samp, CH> {
     }
 }
 
-impl<Samp: Sample, const CH: usize> Sub for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Sub for Frame<Samp, COUNT> {
     type Output = Self;
 
     #[inline(always)]
@@ -744,7 +744,7 @@ impl<Samp: Sample, const CH: usize> Sub for Frame<Samp, CH> {
     }
 }
 
-impl<Samp: Sample, const CH: usize> Mul for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Mul for Frame<Samp, COUNT> {
     type Output = Self;
 
     #[inline(always)]
@@ -756,7 +756,7 @@ impl<Samp: Sample, const CH: usize> Mul for Frame<Samp, CH> {
     }
 }
 
-impl<Samp: Sample, const CH: usize> Neg for Frame<Samp, CH> {
+impl<Samp: Sample, const COUNT: usize> Neg for Frame<Samp, COUNT> {
     type Output = Self;
 
     #[inline(always)]
