@@ -4,7 +4,7 @@ use std::num::NonZeroU32;
 
 use fon::{
     samp::{Samp32, Sample},
-    Audio, Frame, Sink, Resampler,
+    Audio, Frame, Resampler, Sink,
 };
 
 #[derive(Debug)]
