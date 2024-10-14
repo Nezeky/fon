@@ -100,13 +100,13 @@ mod audio;
 mod frame;
 mod math;
 mod private;
+mod resampler;
 mod sink;
-mod stream;
 
 pub mod pos;
 pub mod samp;
 
 pub use audio::{Audio, AudioSink};
 pub use frame::Frame;
+pub use resampler::Resampler;
 pub use sink::{Sink, SinkTo};
-pub use stream::Stream;

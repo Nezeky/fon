@@ -14,7 +14,7 @@ use crate::math::Libm;
 use crate::{
     frame::Frame,
     samp::{Samp16, Samp24, Samp32, Samp64, Sample},
-    Sink, Stream,
+    Resampler, Sink,
 };
 
 /// Audio buffer (fixed-size array of audio [`Frame`](crate::frame::Frame)s at
@@ -60,7 +60,7 @@ impl<Samp: Sample, const COUNT: usize> Audio<Samp, COUNT> {
         let len =
             audio.len() as f64 * hz as f64 / audio.sample_rate().get() as f64;
         let mut output = Self::with_silence(hz, len.ceil() as usize);
-        let mut stream = Stream::new(hz);
+        let mut stream = Resampler::new(hz);
         let mut sink =
             crate::SinkTo::<_, Samp, _, COUNT, N>::new(output.sink());
         stream.pipe(audio, &mut sink);
@@ -130,7 +130,7 @@ impl<Samp: Sample, const COUNT: usize> Audio<Samp, COUNT> {
         }
     }
 
-    /// Sink audio into this audio buffer from a `Stream`.
+    /// Sink audio into this audio buffer from a [`Resampler`].
     #[inline(always)]
     pub fn sink(&mut self) -> AudioSink<'_, Samp, COUNT> {
         AudioSink {

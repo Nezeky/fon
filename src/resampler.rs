@@ -1,5 +1,5 @@
 use alloc::vec::Vec;
-use core::{mem, num::NonZeroU32};
+use core::{array, mem, num::NonZeroU32};
 
 use crate::{
     frame::Frame,
@@ -21,9 +21,9 @@ const WINDOW_FN_KAISER_TABLE: &[f64] = &[
 ];
 const WINDOW_FN_OVERSAMPLE: usize = 32;
 
-/// Stream resampler.
+/// Resampler stream
 #[derive(Debug)]
-pub struct Stream<const N: usize> {
+pub struct Resampler<const N: usize> {
     /// Target sample rate (constant).
     output_sample_rate: u32,
     /// Source sample rate (changeable)
@@ -31,12 +31,12 @@ pub struct Stream<const N: usize> {
     /// Simplified ratio of input ÷ output samples.
     ratio: (u32, u32),
     /// Sample data.
-    samples: [Resampler32; 8],
+    samples: [Resampler32; N],
     /// Calculated input latency for resampler.
     input_latency: u32,
 }
 
-impl<const N: usize> Stream<N> {
+impl<const N: usize> Resampler<N> {
     /// Create a new stream at target sample rate.
     pub fn new(target_hz: u32) -> Self {
         assert_ne!(target_hz, 0);
@@ -44,16 +44,7 @@ impl<const N: usize> Stream<N> {
             output_sample_rate: target_hz,
             input_sample_rate: None,
             ratio: (0, 1),
-            samples: [
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-                Default::default(),
-            ],
+            samples: array::from_fn(|_| Default::default()),
             input_latency: 0,
         }
     }

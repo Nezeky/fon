@@ -4,7 +4,7 @@ use std::num::NonZeroU32;
 
 use fon::{
     samp::{Samp32, Sample},
-    Audio, Frame, Sink, Stream,
+    Audio, Frame, Sink, Resampler,
 };
 
 #[derive(Debug)]
@@ -105,7 +105,7 @@ fn main() -> std::io::Result<()> {
     let mut mixer = Mixer::new(&mut out);
 
     // Create a stream to convert to 48k
-    let mut stream = Stream::<2>::new(48_000);
+    let mut stream = Resampler::<2>::new(48_000);
     stream.pipe(&source, &mut mixer);
     stream.flush(&mut mixer);
 
