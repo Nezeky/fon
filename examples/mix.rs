@@ -3,20 +3,20 @@
 use std::num::NonZeroU32;
 
 use fon::{
-    chan::{Ch32, Channel},
+    samp::{Samp32, Sample},
     Audio, Frame, Sink, Stream,
 };
 
 #[derive(Debug)]
-pub struct Mixer<'a, Chan: Channel, const CH: usize> {
+pub struct Mixer<'a, Samp: Sample, const CH: usize> {
     index: usize,
-    audio: &'a mut Audio<Chan, CH>,
+    audio: &'a mut Audio<Samp, CH>,
 }
 
 #[allow(single_use_lifetimes)]
-impl<'a, Chan: Channel, const CH: usize> Mixer<'a, Chan, CH> {
+impl<'a, Samp: Sample, const CH: usize> Mixer<'a, Samp, CH> {
     #[inline(always)]
-    fn new(audio: &'a mut Audio<Chan, CH>) -> Self {
+    fn new(audio: &'a mut Audio<Samp, CH>) -> Self {
         let index = 0;
 
         Mixer { index, audio }
@@ -25,8 +25,8 @@ impl<'a, Chan: Channel, const CH: usize> Mixer<'a, Chan, CH> {
 
 // Using '_ results in reserved lifetime error.
 #[allow(single_use_lifetimes)]
-impl<'a, Chan: Channel, const CH: usize> Sink<Chan, CH>
-    for Mixer<'a, Chan, CH>
+impl<'a, Samp: Sample, const CH: usize> Sink<Samp, CH>
+    for Mixer<'a, Samp, CH>
 {
     #[inline(always)]
     fn sample_rate(&self) -> NonZeroU32 {
@@ -39,14 +39,14 @@ impl<'a, Chan: Channel, const CH: usize> Sink<Chan, CH>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Chan, CH>>) {
+    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, CH>>) {
         let mut this = self;
-        Sink::<Chan, CH>::sink_with(&mut this, iter)
+        Sink::<Samp, CH>::sink_with(&mut this, iter)
     }
 }
 
-impl<Chan: Channel, const CH: usize> Sink<Chan, CH>
-    for &mut Mixer<'_, Chan, CH>
+impl<Samp: Sample, const CH: usize> Sink<Samp, CH>
+    for &mut Mixer<'_, Samp, CH>
 {
     #[inline(always)]
     fn sample_rate(&self) -> NonZeroU32 {
@@ -59,11 +59,11 @@ impl<Chan: Channel, const CH: usize> Sink<Chan, CH>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Chan, CH>>) {
+    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, CH>>) {
         for frame in self.audio.iter_mut().skip(self.index) {
             if let Some(other) = iter.next() {
                 for (channel, chan) in
-                    frame.channels_mut().iter_mut().zip(other.channels())
+                    frame.samples_mut().iter_mut().zip(other.samples())
                 {
                     *channel += *chan;
                 }
@@ -75,7 +75,7 @@ impl<Chan: Channel, const CH: usize> Sink<Chan, CH>
     }
 }
 
-fn load_file(in_hz: u32, in_file: &str) -> Audio<Ch32, 2> {
+fn load_file(in_hz: u32, in_file: &str) -> Audio<Samp32, 2> {
     // Load file as f32 buffer.
     let rawfile = std::fs::read(in_file).unwrap();
     let mut audio = Vec::new();
@@ -86,11 +86,11 @@ fn load_file(in_hz: u32, in_file: &str) -> Audio<Ch32, 2> {
     Audio::with_f32_buffer(in_hz, audio)
 }
 
-fn save_file(name: &str, audio: &Audio<Ch32, 2>) -> std::io::Result<()> {
+fn save_file(name: &str, audio: &Audio<Samp32, 2>) -> std::io::Result<()> {
     // Convert audio to byte buffer
     let mut samples = Vec::<u8>::new();
     for frame in audio.iter() {
-        for channel in frame.channels() {
+        for channel in frame.samples() {
             samples.extend(channel.to_f32().to_le_bytes());
         }
     }

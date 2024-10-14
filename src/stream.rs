@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 use core::{mem, num::NonZeroU32};
 
 use crate::{
-    chan::{Ch32, Channel},
+    samp::{Samp32, Sample},
     frame::Frame,
     Audio, Sink,
 };
@@ -30,8 +30,8 @@ pub struct Stream<const CH: usize> {
     input_sample_rate: Option<NonZeroU32>,
     /// Simplified ratio of input ÷ output samples.
     ratio: (u32, u32),
-    /// Channel data.
-    channels: [Resampler32; 8],
+    /// Sample data.
+    samples: [Resampler32; 8],
     /// Calculated input latency for resampler.
     input_latency: u32,
 }
@@ -44,7 +44,7 @@ impl<const CH: usize> Stream<CH> {
             output_sample_rate: target_hz,
             input_sample_rate: None,
             ratio: (0, 1),
-            channels: [
+            samples: [
                 Default::default(),
                 Default::default(),
                 Default::default(),
@@ -67,7 +67,7 @@ impl<const CH: usize> Stream<CH> {
         // Handle sample rate change, if needed.
         if NonZeroU32::new(hz.get()) != self.input_sample_rate {
             // Prepare each channel for sample rate change
-            for ch in self.channels.iter_mut() {
+            for ch in self.samples.iter_mut() {
                 // Store fractional sample data.
                 let v = ch.state.samp_frac_num;
                 ch.state.samp_frac_num = speex::_muldiv(v, den, self.ratio.1);
@@ -85,22 +85,22 @@ impl<const CH: usize> Stream<CH> {
     }
 
     /// Flush audio to sink and end stream.
-    pub fn flush<Ch, S>(mut self, sink: S)
+    pub fn flush<S, K>(mut self, sink: K)
     where
-        Ch: Channel,
-        S: Sink<Ch, CH>,
+        S: Sample,
+        K: Sink<S, CH>,
     {
-        if self.channels[0].state.started == 0 {
+        if self.samples[0].state.started == 0 {
             return;
         }
 
         // Generate silence.
         for chan in 0..CH {
-            self.channels[chan].input.clear();
+            self.samples[chan].input.clear();
         }
         for _ in 0..self.input_latency {
             for chan in 0..CH {
-                self.channels[chan].input.push(0.0);
+                self.samples[chan].input.push(0.0);
             }
         }
 
@@ -113,18 +113,18 @@ impl<const CH: usize> Stream<CH> {
     /// If the sink gets full, then no more audio will be written.  If there is
     /// not enough audio then the sink chooses whether or not to fill the rest
     /// of it's buffer with silence.
-    pub fn pipe<Chan, Ch, S>(&mut self, audio: &Audio<Chan, CH>, mut sink: S)
+    pub fn pipe<Samp, S, K>(&mut self, audio: &Audio<Samp, CH>, mut sink: K)
     where
-        Chan: Channel,
-        Ch: Channel + From<Chan>,
-        S: Sink<Ch, CH>,
-        Ch32: From<Chan>,
+        Samp: Sample,
+        S: Sample + From<Samp>,
+        K: Sink<S, CH>,
+        Samp32: From<Samp>,
     {
         // Make sure that the sample rates match.
         assert_eq!(sink.sample_rate().get(), self.output_sample_rate);
 
         // If sample rates match, do a copy (faster than resampling).
-        if self.channels[0].state.started == 0
+        if self.samples[0].state.started == 0
             && sink.sample_rate() == audio.sample_rate()
         {
             sink.sink_with(&mut audio.iter().cloned().map(|x| x.to()));
@@ -138,7 +138,7 @@ impl<const CH: usize> Stream<CH> {
         }
 
         // First, de-interleave input audio data into f32 buffer.
-        let converted = Audio::<Ch32, CH>::with_frames(
+        let converted = Audio::<Samp32, CH>::with_frames(
             audio.sample_rate().get(),
             audio
                 .as_slice()
@@ -147,41 +147,41 @@ impl<const CH: usize> Stream<CH> {
                 .collect::<Vec<_>>(),
         );
         for chan in 0..CH {
-            self.channels[chan].input.clear();
+            self.samples[chan].input.clear();
         }
         for frame in converted.iter() {
             for chan in 0..CH {
-                self.channels[chan]
+                self.samples[chan]
                     .input
-                    .push(frame.channels()[chan].to_f32());
+                    .push(frame.samples()[chan].to_f32());
             }
         }
 
-        // Next, allocate space for output channels and resample.
+        // Next, allocate space for output samples and resample.
         self.resample_audio(sink);
     }
 
-    fn resample_audio<Ch, S>(&mut self, mut sink: S)
+    fn resample_audio<S, K>(&mut self, mut sink: K)
     where
-        Ch: Channel,
-        S: Sink<Ch, CH>,
+        S: Sample,
+        K: Sink<S, CH>,
     {
         // If no input samples, skip doing the work.
-        if self.channels[0].input.is_empty() {
+        if self.samples[0].input.is_empty() {
             return;
         }
 
         let mut out = u32::MAX;
 
-        // Allocate space for output channels and resample
+        // Allocate space for output samples and resample
         for chan in 0..CH {
-            self.channels[chan].output.resize(sink.len(), 0.0);
+            self.samples[chan].output.resize(sink.len(), 0.0);
 
             // FIXME: Remove length parameters, return number of output samples.
-            self.channels[chan].state.process_float(
-                self.channels[chan].input.as_slice(),
-                &mut (self.channels[chan].input.len() as u32),
-                self.channels[chan].output.as_mut_slice(),
+            self.samples[chan].state.process_float(
+                self.samples[chan].input.as_slice(),
+                &mut (self.samples[chan].input.len() as u32),
+                self.samples[chan].output.as_mut_slice(),
                 &mut out,
                 self.ratio.1,
             );
@@ -189,10 +189,10 @@ impl<const CH: usize> Stream<CH> {
 
         // Then, re-interleave the samples back.
         sink.sink_with(&mut (0..out as usize).map(|i| {
-            let mut out_frame = Frame::<Ch, CH>::default();
+            let mut out_frame = Frame::<S, CH>::default();
             for chan in 0..CH {
-                out_frame.channels_mut()[chan] =
-                    Ch::from(self.channels[chan].output[i]);
+                out_frame.samples_mut()[chan] =
+                    S::from(self.samples[chan].output[i]);
             }
             out_frame
         }));

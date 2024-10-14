@@ -6,33 +6,31 @@ use core::{
     ops::{Add, Mul, Neg, Sub},
 };
 
-use crate::chan::Channel;
+use crate::samp::Sample;
 #[cfg(not(test))]
 use crate::math::Libm;
 
-/// Frame - A number of interleaved sample [channel]s.
-///
-/// [channel]: crate::chan::Channel
+/// Frame - A number of interleaved [`Sample`]s
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Frame<Chan: Channel, const CH: usize>([Chan; CH]);
+pub struct Frame<Samp: Sample, const CH: usize>([Samp; CH]);
 
-impl<Chan: Channel, const CH: usize> Default for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> Default for Frame<Samp, CH> {
     fn default() -> Self {
-        Frame([Chan::default(); CH])
+        Frame([Samp::default(); CH])
     }
 }
 
-impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
-    /// Get a mutable slice of the channels in this frame.
+impl<Samp: Sample, const CH: usize> Frame<Samp, CH> {
+    /// Get a mutable slice of the samples in this frame.
     #[inline(always)]
-    pub fn channels_mut(&mut self) -> &mut [Chan; CH] {
+    pub fn samples_mut(&mut self) -> &mut [Samp; CH] {
         &mut self.0
     }
 
-    /// Get a slice of the channels in this frame.
+    /// Get a slice of the samples in this frame.
     #[inline(always)]
-    pub fn channels(&self) -> &[Chan; CH] {
+    pub fn samples(&self) -> &[Samp; CH] {
         &self.0
     }
 
@@ -41,7 +39,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     /// 1.0/0.0 is straight ahead, 0.25 is right, 0.5 is back, and 0.75 is left.
     /// The algorithm used is "Constant Power Panning".
     #[inline(always)]
-    pub fn pan<C: Channel + Into<Chan>>(self, channel: C, angle: f32) -> Self {
+    pub fn pan<C: Sample + Into<Samp>>(self, channel: C, angle: f32) -> Self {
         match CH {
             1 => self.pan_1(channel.into(), angle.rem_euclid(1.0)),
             2 => self.pan_2(channel.into(), angle.rem_euclid(1.0)),
@@ -74,7 +72,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
 
     /// Convert an audio Frame to another format.
     #[inline(always)]
-    pub fn to<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    pub fn to<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         match CH {
             1 => self.to_1(),
             2 => self.to_2(),
@@ -89,7 +87,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_1(mut self, chan: Chan, _x: f32) -> Self {
+    fn pan_1(mut self, chan: Samp, _x: f32) -> Self {
         const MONO: usize = 0;
 
         self.0[MONO] += chan;
@@ -98,7 +96,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_2(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_2(mut self, chan: Samp, x: f32) -> Self {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
 
@@ -112,7 +110,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_3(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_3(mut self, chan: Samp, x: f32) -> Self {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
         const CENTER: usize = 2;
@@ -149,7 +147,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_4(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_4(mut self, chan: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const SURROUND_L: usize = 2;
@@ -187,7 +185,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_5(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_5(mut self, chan: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -231,7 +229,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_6(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_6(mut self, chan: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -276,7 +274,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_7(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_7(mut self, chan: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -328,7 +326,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn pan_8(mut self, chan: Chan, x: f32) -> Self {
+    fn pan_8(mut self, chan: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -387,7 +385,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_1<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_1<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const MONO: usize = 0;
 
         let mut frame = Frame::<C, N>::default();
@@ -402,7 +400,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_2<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_2<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
 
@@ -421,7 +419,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_3<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_3<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
         const CENTER: usize = 2;
@@ -460,7 +458,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_4<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_4<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const SURROUND_L: usize = 2;
@@ -481,7 +479,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_5<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_5<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -505,7 +503,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_6<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_6<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -538,7 +536,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_7<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_7<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -574,7 +572,7 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 
     #[inline(always)]
-    fn to_8<C: Channel + From<Chan>, const N: usize>(self) -> Frame<C, N> {
+    fn to_8<C: Sample + From<Samp>, const N: usize>(self) -> Frame<C, N> {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -613,101 +611,101 @@ impl<Chan: Channel, const CH: usize> Frame<Chan, CH> {
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 1> {
+impl<Samp: Sample> Frame<Samp, 1> {
     /// Create a new mono interleaved audio frame from channel(s).
     #[inline(always)]
-    pub fn new(mono: Chan) -> Self {
+    pub fn new(mono: Samp) -> Self {
         Self([mono])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 2> {
+impl<Samp: Sample> Frame<Samp, 2> {
     /// Create a new stereo interleaved audio frame from channel(s).
     #[inline(always)]
-    pub fn new(left: Chan, right: Chan) -> Self {
+    pub fn new(left: Samp, right: Samp) -> Self {
         Self([left, right])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 3> {
+impl<Samp: Sample> Frame<Samp, 3> {
     /// Create a new surround 3.0 interleaved audio frame from channel(s).
     #[inline(always)]
-    pub fn new(left: Chan, right: Chan, center: Chan) -> Self {
+    pub fn new(left: Samp, right: Samp, center: Samp) -> Self {
         Self([left, right, center])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 4> {
+impl<Samp: Sample> Frame<Samp, 4> {
     /// Create a new surround 4.0 interleaved audio frame from channel(s).
     #[inline(always)]
     pub fn new(
-        left: Chan,
-        right: Chan,
-        back_left: Chan,
-        back_right: Chan,
+        left: Samp,
+        right: Samp,
+        back_left: Samp,
+        back_right: Samp,
     ) -> Self {
         Self([left, right, back_left, back_right])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 5> {
+impl<Samp: Sample> Frame<Samp, 5> {
     /// Create a new surround 5.0 interleaved audio frame from channel(s).
     #[inline(always)]
     pub fn new(
-        left: Chan,
-        right: Chan,
-        center: Chan,
-        back_left: Chan,
-        back_right: Chan,
+        left: Samp,
+        right: Samp,
+        center: Samp,
+        back_left: Samp,
+        back_right: Samp,
     ) -> Self {
         Self([left, right, center, back_left, back_right])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 6> {
+impl<Samp: Sample> Frame<Samp, 6> {
     /// Create a new surround 5.1 interleaved audio frame from channel(s).
     #[inline(always)]
     pub fn new(
-        left: Chan,
-        right: Chan,
-        center: Chan,
-        lfe: Chan,
-        back_left: Chan,
-        back_right: Chan,
+        left: Samp,
+        right: Samp,
+        center: Samp,
+        lfe: Samp,
+        back_left: Samp,
+        back_right: Samp,
     ) -> Self {
         Self([left, right, center, lfe, back_left, back_right])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 7> {
+impl<Samp: Sample> Frame<Samp, 7> {
     /// Create a new surround 6.1 interleaved audio frame from channel(s).
     #[inline(always)]
     pub fn new(
-        left: Chan,
-        right: Chan,
-        center: Chan,
-        lfe: Chan,
-        back: Chan,
-        side_left: Chan,
-        side_right: Chan,
+        left: Samp,
+        right: Samp,
+        center: Samp,
+        lfe: Samp,
+        back: Samp,
+        side_left: Samp,
+        side_right: Samp,
     ) -> Self {
         Self([left, right, center, lfe, back, side_left, side_right])
     }
 }
 
-impl<Chan: Channel> Frame<Chan, 8> {
+impl<Samp: Sample> Frame<Samp, 8> {
     /// Create a new surround 7.1 interleaved audio frame from channel(s).
     #[inline(always)]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        left: Chan,
-        right: Chan,
-        center: Chan,
-        lfe: Chan,
-        back_left: Chan,
-        back_right: Chan,
-        side_left: Chan,
-        side_right: Chan,
+        left: Samp,
+        right: Samp,
+        center: Samp,
+        lfe: Samp,
+        back_left: Samp,
+        back_right: Samp,
+        side_left: Samp,
+        side_right: Samp,
     ) -> Self {
         Self([
             left, right, center, lfe, back_left, back_right, side_left,
@@ -716,13 +714,13 @@ impl<Chan: Channel> Frame<Chan, 8> {
     }
 }
 
-impl<Chan: Channel, const CH: usize> From<f32> for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> From<f32> for Frame<Samp, CH> {
     fn from(rhs: f32) -> Self {
-        Frame([Chan::from(rhs); CH])
+        Frame([Samp::from(rhs); CH])
     }
 }
 
-impl<Chan: Channel, const CH: usize> Add for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> Add for Frame<Samp, CH> {
     type Output = Self;
 
     #[inline(always)]
@@ -734,7 +732,7 @@ impl<Chan: Channel, const CH: usize> Add for Frame<Chan, CH> {
     }
 }
 
-impl<Chan: Channel, const CH: usize> Sub for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> Sub for Frame<Samp, CH> {
     type Output = Self;
 
     #[inline(always)]
@@ -746,7 +744,7 @@ impl<Chan: Channel, const CH: usize> Sub for Frame<Chan, CH> {
     }
 }
 
-impl<Chan: Channel, const CH: usize> Mul for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> Mul for Frame<Samp, CH> {
     type Output = Self;
 
     #[inline(always)]
@@ -758,7 +756,7 @@ impl<Chan: Channel, const CH: usize> Mul for Frame<Chan, CH> {
     }
 }
 
-impl<Chan: Channel, const CH: usize> Neg for Frame<Chan, CH> {
+impl<Samp: Sample, const CH: usize> Neg for Frame<Samp, CH> {
     type Output = Self;
 
     #[inline(always)]

@@ -1,7 +1,7 @@
-use crate::chan::{Ch16, Ch24, Ch32, Ch64};
+use crate::samp::{Samp16, Samp24, Samp32, Samp64};
 
 pub trait Sealed {}
-impl Sealed for Ch16 {}
-impl Sealed for Ch24 {}
-impl Sealed for Ch32 {}
-impl Sealed for Ch64 {}
+impl Sealed for Samp16 {}
+impl Sealed for Samp24 {}
+impl Sealed for Samp32 {}
+impl Sealed for Samp64 {}

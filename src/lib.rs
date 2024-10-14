@@ -33,11 +33,13 @@
 //!
 //! ## 8-Bit Sawtooth Wave Example
 //! ```rust
-//! use fon::chan::{Ch16, Ch32};
-//! use fon::pos::Mono;
-//! use fon::Audio;
+//! use fon::{
+//!     pos::Mono,
+//!     samp::{Samp16, Samp32},
+//!     Audio,
+//! };
 //!
-//! let mut a = Audio::<Ch32, 1>::with_silence(48_000, 256);
+//! let mut a = Audio::<Samp32, 1>::with_silence(48_000, 256);
 //! let mut counter = 0.0;
 //! for f in a.iter_mut() {
 //!     f[Mono] = counter.into();
@@ -45,14 +47,14 @@
 //!     counter %= 1.0;
 //! }
 //!
-//! let mut audio = Audio::<Ch16, 1>::with_audio(48_000, &a);
+//! let mut audio = Audio::<Samp16, 1>::with_audio(48_000, &a);
 //! ```
 //!
 //! [audio buffer]: crate::Audio
-//! [16-bit Signed Integer PCM]: crate::chan::Ch16
-//! [24-bit Signed Integer PCM]: crate::chan::Ch24
-//! [32-bit Float PCM]: crate::chan::Ch32
-//! [64-bit Float PCM]: crate::chan::Ch64
+//! [16-bit Signed Integer PCM]: crate::samp::Samp16
+//! [24-bit Signed Integer PCM]: crate::samp::Samp24
+//! [32-bit Float PCM]: crate::samp::Samp32
+//! [64-bit Float PCM]: crate::samp::Samp64
 //! [operations]: crate::ops
 //! [this MDN article]: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Audio_concepts
 //! [Mono]: crate::pos::Mono
@@ -101,8 +103,7 @@ mod private;
 mod sink;
 mod stream;
 
-pub mod chan;
-
+pub mod samp;
 pub mod pos;
 
 pub use audio::{Audio, AudioSink};
