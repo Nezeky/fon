@@ -7,11 +7,9 @@
 // At your choosing (See accompanying files LICENSE_APACHE_2_0.txt,
 // LICENSE_MIT.txt and LICENSE_BOOST_1_0.txt).
 
-use core::fmt::Debug;
-use core::num::NonZeroU32;
+use core::{fmt::Debug, num::NonZeroU32};
 
-use crate::chan::Channel;
-use crate::Frame;
+use crate::{chan::Channel, Frame};
 
 /// Audio sink - a type that consumes audio samples.
 pub trait Sink<Chan: Channel, const CH: usize>: Debug {

@@ -9,9 +9,9 @@
 
 //! Speaker/channel positions within a speaker configuration.
 
-use crate::chan::Channel;
-use crate::frame::Frame;
 use core::ops::{Index, IndexMut};
+
+use crate::{chan::Channel, frame::Frame};
 
 /// All directions
 ///  - Mono

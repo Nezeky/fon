@@ -1,6 +1,8 @@
-use fon::chan::{Ch16, Ch32};
-use fon::pos::Mono;
-use fon::Audio;
+use fon::{
+    chan::{Ch16, Ch32},
+    pos::Mono,
+    Audio,
+};
 
 fn main() {
     // Create mono 32-bit floating point audio buffer.

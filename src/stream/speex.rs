@@ -1,13 +1,11 @@
 // FIXME: Once remove macros, can delete
 #![allow(trivial_casts, trivial_numeric_casts)]
 
+use alloc::{vec, vec::Vec};
+use core::{f64::consts::PI, mem};
+
 #[cfg(not(test))]
 use crate::math::Libm;
-
-use alloc::vec;
-use alloc::vec::Vec;
-use core::f64::consts::PI;
-use core::mem;
 
 #[derive(Clone)]
 pub(crate) struct ResamplerState {
@@ -138,14 +136,15 @@ macro_rules! algo {
 }
 
 impl ResamplerState {
-    /* * Resample a float array. The input and output buffers must *not* overlap.
-     * @param st Resampler state
-     * @param in Input buffer
-     * @param in_len number of input samples in the input buffer. Returns the
-     * number of samples processed
-     * @param out Output buffer
-     * @param out_len Size of the output buffer. Returns the number of samples written
-     */
+    /// Resample a float array. The input and output buffers must *not* overlap.
+    ///
+    ///  - @param st Resampler state
+    ///  - @param in Input buffer
+    ///  - @param in_len number of input samples in the input buffer. Returns
+    ///    the number of samples processed
+    ///  - @param out Output buffer
+    ///  - @param out_len Size of the output buffer. Returns the number of
+    ///    samples written
     pub(crate) fn process_float(
         &mut self,
         mut in_0: &[f32],
@@ -198,22 +197,22 @@ impl ResamplerState {
         }
     }
 
-    /* * Make sure that the first samples to go out of the resamplers don't have
-     * leading zeros. This is only useful before starting to use a newly created
-     * resampler. It is recommended to use that when resampling an audio file, as
-     * it will generate a file with the same length. For real-time processing,
-     * it is probably easier not to use this call (so that the output duration
-     * is the same for the first frame).
-     * @param st Resampler state
-     */
+    /// Make sure that the first samples to go out of the resamplers don't have
+    /// leading zeros. This is only useful before starting to use a newly
+    /// created resampler. It is recommended to use that when resampling an
+    /// audio file, as it will generate a file with the same length.  For
+    /// real-time processing, it is probably easier not to use this call (so
+    /// that the output duration is the same for the first frame).
+    ///
+    ///  - @param st Resampler state
     pub(crate) fn skip_zeros(&mut self) {
         let filt_len = self.filt_len / 2;
         self.last_sample = filt_len;
     }
 
-    /* * Reset a resampler so a new (unrelated) stream can be processed.
-     * @param st Resampler state
-     */
+    /// Reset a resampler so a new (unrelated) stream can be processed.
+    ///
+    ///  - @param st Resampler state
     #[allow(unused)] // For now.
     pub(crate) fn reset_mem(&mut self) {
         self.last_sample = 0;

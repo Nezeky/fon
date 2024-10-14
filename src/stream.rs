@@ -8,12 +8,13 @@
 // LICENSE_MIT.txt and LICENSE_BOOST_1_0.txt).
 
 use alloc::vec::Vec;
-use core::mem;
-use core::num::NonZeroU32;
+use core::{mem, num::NonZeroU32};
 
-use crate::chan::{Ch32, Channel};
-use crate::frame::Frame;
-use crate::{Audio, Sink};
+use crate::{
+    chan::{Ch32, Channel},
+    frame::Frame,
+    Audio, Sink,
+};
 
 mod speex;
 
