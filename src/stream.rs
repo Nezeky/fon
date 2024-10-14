@@ -2,8 +2,8 @@ use alloc::vec::Vec;
 use core::{mem, num::NonZeroU32};
 
 use crate::{
-    samp::{Samp32, Sample},
     frame::Frame,
+    samp::{Samp32, Sample},
     Audio, Sink,
 };
 
@@ -95,12 +95,12 @@ impl<const N: usize> Stream<N> {
         }
 
         // Generate silence.
-        for chan in 0..N {
-            self.samples[chan].input.clear();
+        for samp in 0..N {
+            self.samples[samp].input.clear();
         }
         for _ in 0..self.input_latency {
-            for chan in 0..N {
-                self.samples[chan].input.push(0.0);
+            for samp in 0..N {
+                self.samples[samp].input.push(0.0);
             }
         }
 
@@ -146,14 +146,14 @@ impl<const N: usize> Stream<N> {
                 .map(|frame| frame.to())
                 .collect::<Vec<_>>(),
         );
-        for chan in 0..N {
-            self.samples[chan].input.clear();
+        for samp in 0..N {
+            self.samples[samp].input.clear();
         }
         for frame in converted.iter() {
-            for chan in 0..N {
-                self.samples[chan]
+            for samp in 0..N {
+                self.samples[samp]
                     .input
-                    .push(frame.samples()[chan].to_f32());
+                    .push(frame.samples()[samp].to_f32());
             }
         }
 
@@ -174,14 +174,14 @@ impl<const N: usize> Stream<N> {
         let mut out = u32::MAX;
 
         // Allocate space for output samples and resample
-        for chan in 0..N {
-            self.samples[chan].output.resize(sink.len(), 0.0);
+        for samp in 0..N {
+            self.samples[samp].output.resize(sink.len(), 0.0);
 
             // FIXME: Remove length parameters, return number of output samples.
-            self.samples[chan].state.process_float(
-                self.samples[chan].input.as_slice(),
-                &mut (self.samples[chan].input.len() as u32),
-                self.samples[chan].output.as_mut_slice(),
+            self.samples[samp].state.process_float(
+                self.samples[samp].input.as_slice(),
+                &mut (self.samples[samp].input.len() as u32),
+                self.samples[samp].output.as_mut_slice(),
                 &mut out,
                 self.ratio.1,
             );
@@ -190,9 +190,9 @@ impl<const N: usize> Stream<N> {
         // Then, re-interleave the samples back.
         sink.sink_with(&mut (0..out as usize).map(|i| {
             let mut out_frame = Frame::<S, N>::default();
-            for chan in 0..N {
-                out_frame.samples_mut()[chan] =
-                    S::from(self.samples[chan].output[i]);
+            for samp in 0..N {
+                out_frame.samples_mut()[samp] =
+                    S::from(self.samples[samp].output[i]);
             }
             out_frame
         }));

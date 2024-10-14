@@ -615,13 +615,7 @@ fn speex_resampler_magic(
 ) -> u32 {
     let mut tmp_in_len = st.magic_samples;
     let mem_idx = st.filt_len as usize;
-    speex_resampler_process_native(
-        st,
-        &mut tmp_in_len,
-        out,
-        &mut out_len,
-        den,
-    );
+    speex_resampler_process_native(st, &mut tmp_in_len, out, &mut out_len, den);
     st.magic_samples -= tmp_in_len;
     if st.magic_samples != 0 {
         let mem = &st.mem[mem_idx - 1 + tmp_in_len as usize..].to_vec();

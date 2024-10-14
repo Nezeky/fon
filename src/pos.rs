@@ -2,7 +2,7 @@
 
 use core::ops::{Index, IndexMut};
 
-use crate::{samp::Sample, frame::Frame};
+use crate::{frame::Frame, samp::Sample};
 
 /// All directions
 ///  - Mono

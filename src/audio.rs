@@ -12,8 +12,8 @@ use core::{
 #[cfg(not(test))]
 use crate::math::Libm;
 use crate::{
-    samp::{Samp16, Samp24, Samp32, Samp64, Sample},
     frame::Frame,
+    samp::{Samp16, Samp24, Samp32, Samp64, Sample},
     Sink, Stream,
 };
 
@@ -61,7 +61,8 @@ impl<Samp: Sample, const COUNT: usize> Audio<Samp, COUNT> {
             audio.len() as f64 * hz as f64 / audio.sample_rate().get() as f64;
         let mut output = Self::with_silence(hz, len.ceil() as usize);
         let mut stream = Stream::new(hz);
-        let mut sink = crate::SinkTo::<_, Samp, _, COUNT, N>::new(output.sink());
+        let mut sink =
+            crate::SinkTo::<_, Samp, _, COUNT, N>::new(output.sink());
         stream.pipe(audio, &mut sink);
         stream.flush(&mut sink);
         output
@@ -162,7 +163,10 @@ impl<'a, Samp: Sample, const COUNT: usize> Sink<Samp, COUNT>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, COUNT>>) {
+    fn sink_with(
+        &mut self,
+        iter: &mut dyn Iterator<Item = Frame<Samp, COUNT>>,
+    ) {
         let mut this = self;
         Sink::<Samp, COUNT>::sink_with(&mut this, iter)
     }
@@ -182,7 +186,10 @@ impl<Samp: Sample, const COUNT: usize> Sink<Samp, COUNT>
     }
 
     #[inline(always)]
-    fn sink_with(&mut self, iter: &mut dyn Iterator<Item = Frame<Samp, COUNT>>) {
+    fn sink_with(
+        &mut self,
+        iter: &mut dyn Iterator<Item = Frame<Samp, COUNT>>,
+    ) {
         for frame in self.audio.iter_mut().skip(self.index) {
             *frame = if let Some(frame) = iter.next() {
                 frame
@@ -326,7 +333,8 @@ impl<const COUNT: usize> Audio<Samp64, COUNT> {
     }
 }
 
-impl<Samp, const COUNT: usize> From<Audio<Samp, COUNT>> for Vec<Frame<Samp, COUNT>>
+impl<Samp, const COUNT: usize> From<Audio<Samp, COUNT>>
+    for Vec<Frame<Samp, COUNT>>
 where
     Samp: Sample,
 {

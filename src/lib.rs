@@ -103,8 +103,8 @@ mod private;
 mod sink;
 mod stream;
 
-pub mod samp;
 pub mod pos;
+pub mod samp;
 
 pub use audio::{Audio, AudioSink};
 pub use frame::Frame;

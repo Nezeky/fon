@@ -1,6 +1,7 @@
-//! Audio channels (left, right, etc.).  Each channel contains a single sample.
+//! Audio samples
 //!
-//! An audio [`Frame`](crate::frame::Frame) is used to group multiple channels.
+//! An audio [`Frame`](crate::frame::Frame) is used to group multiple channels
+//! with a positions configuration.
 
 use core::{
     fmt::Debug,
@@ -635,10 +636,22 @@ mod tests {
         // Test multiplication
         assert_eq!(Samp16::new(0), Samp16::new(0) * Samp16::new(32767));
         assert_eq!(Samp16::new(32767), Samp16::new(32767) * Samp16::new(32767));
-        assert_eq!(Samp16::new(-32768), Samp16::new(32767) * Samp16::new(-32768));
-        assert_eq!(Samp16::new(-32768), Samp16::new(-32768) * Samp16::new(32767));
-        assert_eq!(Samp16::new(32767), Samp16::new(-32768) * Samp16::new(-32768));
-        assert_eq!(Samp16::new(-16384), Samp16::new(32767) * Samp16::new(-16384));
+        assert_eq!(
+            Samp16::new(-32768),
+            Samp16::new(32767) * Samp16::new(-32768)
+        );
+        assert_eq!(
+            Samp16::new(-32768),
+            Samp16::new(-32768) * Samp16::new(32767)
+        );
+        assert_eq!(
+            Samp16::new(32767),
+            Samp16::new(-32768) * Samp16::new(-32768)
+        );
+        assert_eq!(
+            Samp16::new(-16384),
+            Samp16::new(32767) * Samp16::new(-16384)
+        );
         // Test negation
         assert_eq!(Samp16::MIN, -Samp16::MAX);
         assert_eq!(Samp16::MAX, -Samp16::MIN);
@@ -649,7 +662,10 @@ mod tests {
     #[test]
     fn ch24_arith() {
         // Test addition
-        assert_eq!(Samp24::new(-1), Samp24::new(-8388608) + Samp24::new(8388607));
+        assert_eq!(
+            Samp24::new(-1),
+            Samp24::new(-8388608) + Samp24::new(8388607)
+        );
         assert_eq!(
             Samp24::new(2097152),
             Samp24::new(-2097152) + Samp24::new(4194304)
@@ -657,12 +673,21 @@ mod tests {
         assert_eq!(Samp24::MAX, Samp24::MID + Samp24::MAX);
         assert_eq!(Samp24::MIN, Samp24::new(-4194304) + Samp24::new(-4194304));
         // Test subtraction
-        assert_eq!(Samp24::new(0), Samp24::new(-8388608) - Samp24::new(-8388608));
+        assert_eq!(
+            Samp24::new(0),
+            Samp24::new(-8388608) - Samp24::new(-8388608)
+        );
         assert_eq!(Samp24::new(0), Samp24::new(8388607) - Samp24::new(8388607));
-        assert_eq!(Samp24::new(-8388607), Samp24::new(0) - Samp24::new(8388607));
+        assert_eq!(
+            Samp24::new(-8388607),
+            Samp24::new(0) - Samp24::new(8388607)
+        );
         // Test multiplication
         assert_eq!(Samp24::new(0), Samp24::new(0) * Samp24::new(8388607));
-        assert_eq!(Samp24::new(8388607), Samp24::new(8388607) * Samp24::new(8388607));
+        assert_eq!(
+            Samp24::new(8388607),
+            Samp24::new(8388607) * Samp24::new(8388607)
+        );
         assert_eq!(
             Samp24::new(-8388608),
             Samp24::new(8388607) * Samp24::new(-8388608)

@@ -6,9 +6,9 @@ use core::{
     ops::{Add, Mul, Neg, Sub},
 };
 
-use crate::samp::Sample;
 #[cfg(not(test))]
 use crate::math::Libm;
+use crate::samp::Sample;
 
 /// Frame - A number of interleaved [`Sample`]s
 #[repr(transparent)]
@@ -87,30 +87,30 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_1(mut self, chan: Samp, _x: f32) -> Self {
+    fn pan_1(mut self, samp: Samp, _x: f32) -> Self {
         const MONO: usize = 0;
 
-        self.0[MONO] += chan;
+        self.0[MONO] += samp;
 
         self
     }
 
     #[inline(always)]
-    fn pan_2(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_2(mut self, samp: Samp, x: f32) -> Self {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
 
         // Convert to radians, left is now at 0.
         let x = (x + 0.25) * core::f32::consts::PI;
         // Pan distance
-        self.0[LEFT] += chan * x.cos().into();
-        self.0[RIGHT] += chan * x.sin().into();
+        self.0[LEFT] += samp * x.cos().into();
+        self.0[RIGHT] += samp * x.sin().into();
 
         self
     }
 
     #[inline(always)]
-    fn pan_3(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_3(mut self, samp: Samp, x: f32) -> Self {
         const LEFT: usize = 0;
         const RIGHT: usize = 1;
         const CENTER: usize = 2;
@@ -120,26 +120,26 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Center-Right Speakers
             x if x < 0.25 => {
                 let x = 4.0 * x * FRAC_PI_2;
-                self.0[CENTER] += chan * x.cos().into();
-                self.0[RIGHT] += chan * x.sin().into();
+                self.0[CENTER] += samp * x.cos().into();
+                self.0[RIGHT] += samp * x.sin().into();
             }
             // Right-Center Speakers
             x if x < 0.5 => {
                 let x = 4.0 * (x - 0.25) * FRAC_PI_2;
-                self.0[RIGHT] += chan * x.cos().into();
-                self.0[CENTER] += chan * x.sin().into();
+                self.0[RIGHT] += samp * x.cos().into();
+                self.0[CENTER] += samp * x.sin().into();
             }
             // Center-Left Speakers
             x if x < 0.75 => {
                 let x = 4.0 * (x - 0.50) * FRAC_PI_2;
-                self.0[CENTER] += chan * x.cos().into();
-                self.0[LEFT] += chan * x.sin().into();
+                self.0[CENTER] += samp * x.cos().into();
+                self.0[LEFT] += samp * x.sin().into();
             }
             // Left-Center Speakers
             x => {
                 let x = 4.0 * (x - 0.75) * FRAC_PI_2;
-                self.0[LEFT] += chan * x.cos().into();
-                self.0[CENTER] += chan * x.sin().into();
+                self.0[LEFT] += samp * x.cos().into();
+                self.0[CENTER] += samp * x.sin().into();
             }
         }
 
@@ -147,7 +147,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_4(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_4(mut self, samp: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const SURROUND_L: usize = 2;
@@ -158,26 +158,26 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Front Left - Front Right Speakers (60° slice)
             x if x < 60.0 / 360.0 => {
                 let x = (360.0 / 60.0) * x * FRAC_PI_2;
-                self.0[FRONT_L] += chan * x.cos().into();
-                self.0[FRONT_R] += chan * x.sin().into();
+                self.0[FRONT_L] += samp * x.cos().into();
+                self.0[FRONT_R] += samp * x.sin().into();
             }
             // Front Right - Back Right Speakers (80° slice)
             x if x < 140.0 / 360.0 => {
                 let x = (360.0 / 80.0) * (x - 60.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_R] += chan * x.cos().into();
-                self.0[SURROUND_R] += chan * x.sin().into();
+                self.0[FRONT_R] += samp * x.cos().into();
+                self.0[SURROUND_R] += samp * x.sin().into();
             }
             // Back Right - Back Left Speakers (140° slice)
             x if x < 280.0 / 360.0 => {
                 let x = (360.0 / 140.0) * (x - 140.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_R] += chan * x.cos().into();
-                self.0[SURROUND_L] += chan * x.sin().into();
+                self.0[SURROUND_R] += samp * x.cos().into();
+                self.0[SURROUND_L] += samp * x.sin().into();
             }
             // Back Left - Front Left Speakers (80° slice)
             x => {
                 let x = (360.0 / 80.0) * (x - 280.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_L] += chan * x.cos().into();
-                self.0[FRONT_L] += chan * x.sin().into();
+                self.0[SURROUND_L] += samp * x.cos().into();
+                self.0[FRONT_L] += samp * x.sin().into();
             }
         }
 
@@ -185,7 +185,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_5(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_5(mut self, samp: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -196,32 +196,32 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Front Center - Front Right Speakers (30° slice)
             x if x < 30.0 / 360.0 => {
                 let x = (360.0 / 30.0) * x * FRAC_PI_2;
-                self.0[FRONT] += chan * x.cos().into();
-                self.0[FRONT_R] += chan * x.sin().into();
+                self.0[FRONT] += samp * x.cos().into();
+                self.0[FRONT_R] += samp * x.sin().into();
             }
             // Front Right - Back Right Speakers (80° slice)
             x if x < 110.0 / 360.0 => {
                 let x = (360.0 / 80.0) * (x - 30.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_R] += chan * x.cos().into();
-                self.0[SURROUND_R] += chan * x.sin().into();
+                self.0[FRONT_R] += samp * x.cos().into();
+                self.0[SURROUND_R] += samp * x.sin().into();
             }
             // Back Right - Back Left Speakers (140° slice)
             x if x < 250.0 / 360.0 => {
                 let x = (360.0 / 140.0) * (x - 110.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_R] += chan * x.cos().into();
-                self.0[SURROUND_L] += chan * x.sin().into();
+                self.0[SURROUND_R] += samp * x.cos().into();
+                self.0[SURROUND_L] += samp * x.sin().into();
             }
             // Back Left - Front Left Speakers (80° slice)
             x if x < 330.0 / 360.0 => {
                 let x = (360.0 / 80.0) * (x - 250.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_L] += chan * x.cos().into();
-                self.0[FRONT_L] += chan * x.sin().into();
+                self.0[SURROUND_L] += samp * x.cos().into();
+                self.0[FRONT_L] += samp * x.sin().into();
             }
             // Front Left - Center Speakers (30° slice)
             x => {
                 let x = (360.0 / 30.0) * (x - 330.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_L] += chan * x.cos().into();
-                self.0[FRONT] += chan * x.sin().into();
+                self.0[FRONT_L] += samp * x.cos().into();
+                self.0[FRONT] += samp * x.sin().into();
             }
         }
 
@@ -229,7 +229,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_6(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_6(mut self, samp: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -241,32 +241,32 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Front Center - Front Right Speakers (30° slice)
             x if x < 30.0 / 360.0 => {
                 let x = (360.0 / 30.0) * x * FRAC_PI_2;
-                self.0[FRONT] += chan * x.cos().into();
-                self.0[FRONT_R] += chan * x.sin().into();
+                self.0[FRONT] += samp * x.cos().into();
+                self.0[FRONT_R] += samp * x.sin().into();
             }
             // Front Right - Back Right Speakers (80° slice)
             x if x < 110.0 / 360.0 => {
                 let x = (360.0 / 80.0) * (x - 30.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_R] += chan * x.cos().into();
-                self.0[SURROUND_R] += chan * x.sin().into();
+                self.0[FRONT_R] += samp * x.cos().into();
+                self.0[SURROUND_R] += samp * x.sin().into();
             }
             // Back Right - Back Left Speakers (140° slice)
             x if x < 250.0 / 360.0 => {
                 let x = (360.0 / 140.0) * (x - 110.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_R] += chan * x.cos().into();
-                self.0[SURROUND_L] += chan * x.sin().into();
+                self.0[SURROUND_R] += samp * x.cos().into();
+                self.0[SURROUND_L] += samp * x.sin().into();
             }
             // Back Left - Front Left Speakers (80° slice)
             x if x < 330.0 / 360.0 => {
                 let x = (360.0 / 80.0) * (x - 250.0 / 360.0) * FRAC_PI_2;
-                self.0[SURROUND_L] += chan * x.cos().into();
-                self.0[FRONT_L] += chan * x.sin().into();
+                self.0[SURROUND_L] += samp * x.cos().into();
+                self.0[FRONT_L] += samp * x.sin().into();
             }
             // Front Left - Center Speakers (30° slice)
             x => {
                 let x = (360.0 / 30.0) * (x - 330.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_L] += chan * x.cos().into();
-                self.0[FRONT] += chan * x.sin().into();
+                self.0[FRONT_L] += samp * x.cos().into();
+                self.0[FRONT] += samp * x.sin().into();
             }
         }
 
@@ -274,7 +274,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_7(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_7(mut self, samp: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -287,38 +287,38 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Front Center - Front Right Speakers (30° slice)
             x if x < 30.0 / 360.0 => {
                 let x = (360.0 / 30.0) * x * FRAC_PI_2;
-                self.0[FRONT] += chan * x.cos().into();
-                self.0[FRONT_R] += chan * x.sin().into();
+                self.0[FRONT] += samp * x.cos().into();
+                self.0[FRONT_R] += samp * x.sin().into();
             }
             // Front Right - Side Right Speakers (60° slice)
             x if x < 90.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 30.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_R] += chan * x.cos().into();
-                self.0[RIGHT] += chan * x.sin().into();
+                self.0[FRONT_R] += samp * x.cos().into();
+                self.0[RIGHT] += samp * x.sin().into();
             }
             // Side Right - Back Speakers (90° slice)
             x if x < 180.0 / 360.0 => {
                 let x = (360.0 / 90.0) * (x - 90.0 / 360.0) * FRAC_PI_2;
-                self.0[RIGHT] += chan * x.cos().into();
-                self.0[BACK] += chan * x.sin().into();
+                self.0[RIGHT] += samp * x.cos().into();
+                self.0[BACK] += samp * x.sin().into();
             }
             // Back - Side Left Speakers (90° slice)
             x if x < 270.0 / 360.0 => {
                 let x = (360.0 / 90.0) * (x - 180.0 / 360.0) * FRAC_PI_2;
-                self.0[BACK] += chan * x.cos().into();
-                self.0[LEFT] += chan * x.sin().into();
+                self.0[BACK] += samp * x.cos().into();
+                self.0[LEFT] += samp * x.sin().into();
             }
             // Side Left - Front Left Speakers (60° slice)
             x if x < 330.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 270.0 / 360.0) * FRAC_PI_2;
-                self.0[LEFT] += chan * x.cos().into();
-                self.0[FRONT_L] += chan * x.sin().into();
+                self.0[LEFT] += samp * x.cos().into();
+                self.0[FRONT_L] += samp * x.sin().into();
             }
             // Front Left - Center Speakers (30° slice)
             x => {
                 let x = (360.0 / 30.0) * (x - 330.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_L] += chan * x.cos().into();
-                self.0[FRONT] += chan * x.sin().into();
+                self.0[FRONT_L] += samp * x.cos().into();
+                self.0[FRONT] += samp * x.sin().into();
             }
         }
 
@@ -326,7 +326,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
     }
 
     #[inline(always)]
-    fn pan_8(mut self, chan: Samp, x: f32) -> Self {
+    fn pan_8(mut self, samp: Samp, x: f32) -> Self {
         const FRONT_L: usize = 0;
         const FRONT_R: usize = 1;
         const FRONT: usize = 2;
@@ -340,44 +340,44 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
             // Front Center - Front Right Speakers (30° slice)
             x if x < 30.0 / 360.0 => {
                 let x = (360.0 / 30.0) * x * FRAC_PI_2;
-                self.0[FRONT] += chan * x.cos().into();
-                self.0[FRONT_R] += chan * x.sin().into();
+                self.0[FRONT] += samp * x.cos().into();
+                self.0[FRONT_R] += samp * x.sin().into();
             }
             // Front Right - Side Right Speakers (60° slice)
             x if x < 90.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 30.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_R] += chan * x.cos().into();
-                self.0[RIGHT] += chan * x.sin().into();
+                self.0[FRONT_R] += samp * x.cos().into();
+                self.0[RIGHT] += samp * x.sin().into();
             }
             // Side Right - Back Right Speakers (60° slice)
             x if x < 150.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 90.0 / 360.0) * FRAC_PI_2;
-                self.0[RIGHT] += chan * x.cos().into();
-                self.0[BACK_R] += chan * x.sin().into();
+                self.0[RIGHT] += samp * x.cos().into();
+                self.0[BACK_R] += samp * x.sin().into();
             }
             // Back Right - Back Left Speakers (60° slice)
             x if x < 210.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 150.0 / 360.0) * FRAC_PI_2;
-                self.0[BACK_R] += chan * x.cos().into();
-                self.0[BACK_L] += chan * x.sin().into();
+                self.0[BACK_R] += samp * x.cos().into();
+                self.0[BACK_L] += samp * x.sin().into();
             }
             // Back Left - Side Left Speakers (60° slice)
             x if x < 270.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 210.0 / 360.0) * FRAC_PI_2;
-                self.0[BACK_L] += chan * x.cos().into();
-                self.0[LEFT] += chan * x.sin().into();
+                self.0[BACK_L] += samp * x.cos().into();
+                self.0[LEFT] += samp * x.sin().into();
             }
             // Side Left - Front Left Speakers (60° slice)
             x if x < 330.0 / 360.0 => {
                 let x = (360.0 / 60.0) * (x - 270.0 / 360.0) * FRAC_PI_2;
-                self.0[LEFT] += chan * x.cos().into();
-                self.0[FRONT_L] += chan * x.sin().into();
+                self.0[LEFT] += samp * x.cos().into();
+                self.0[FRONT_L] += samp * x.sin().into();
             }
             // Front Left - Center Speakers (30° slice)
             x => {
                 let x = (360.0 / 30.0) * (x - 330.0 / 360.0) * FRAC_PI_2;
-                self.0[FRONT_L] += chan * x.cos().into();
-                self.0[FRONT] += chan * x.sin().into();
+                self.0[FRONT_L] += samp * x.cos().into();
+                self.0[FRONT] += samp * x.sin().into();
             }
         }
 
@@ -612,7 +612,7 @@ impl<Samp: Sample, const COUNT: usize> Frame<Samp, COUNT> {
 }
 
 impl<Samp: Sample> Frame<Samp, 1> {
-    /// Create a new mono interleaved audio frame from channel(s).
+    /// Create a new mono interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(mono: Samp) -> Self {
         Self([mono])
@@ -620,7 +620,7 @@ impl<Samp: Sample> Frame<Samp, 1> {
 }
 
 impl<Samp: Sample> Frame<Samp, 2> {
-    /// Create a new stereo interleaved audio frame from channel(s).
+    /// Create a new stereo interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(left: Samp, right: Samp) -> Self {
         Self([left, right])
@@ -628,7 +628,7 @@ impl<Samp: Sample> Frame<Samp, 2> {
 }
 
 impl<Samp: Sample> Frame<Samp, 3> {
-    /// Create a new surround 3.0 interleaved audio frame from channel(s).
+    /// Create a new surround 3.0 interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(left: Samp, right: Samp, center: Samp) -> Self {
         Self([left, right, center])
@@ -636,7 +636,7 @@ impl<Samp: Sample> Frame<Samp, 3> {
 }
 
 impl<Samp: Sample> Frame<Samp, 4> {
-    /// Create a new surround 4.0 interleaved audio frame from channel(s).
+    /// Create a new surround 4.0 interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(
         left: Samp,
@@ -649,7 +649,7 @@ impl<Samp: Sample> Frame<Samp, 4> {
 }
 
 impl<Samp: Sample> Frame<Samp, 5> {
-    /// Create a new surround 5.0 interleaved audio frame from channel(s).
+    /// Create a new surround 5.0 interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(
         left: Samp,
@@ -663,7 +663,7 @@ impl<Samp: Sample> Frame<Samp, 5> {
 }
 
 impl<Samp: Sample> Frame<Samp, 6> {
-    /// Create a new surround 5.1 interleaved audio frame from channel(s).
+    /// Create a new surround 5.1 interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(
         left: Samp,
@@ -678,7 +678,7 @@ impl<Samp: Sample> Frame<Samp, 6> {
 }
 
 impl<Samp: Sample> Frame<Samp, 7> {
-    /// Create a new surround 6.1 interleaved audio frame from channel(s).
+    /// Create a new surround 6.1 interleaved audio frame from sample(s).
     #[inline(always)]
     pub fn new(
         left: Samp,
@@ -694,7 +694,7 @@ impl<Samp: Sample> Frame<Samp, 7> {
 }
 
 impl<Samp: Sample> Frame<Samp, 8> {
-    /// Create a new surround 7.1 interleaved audio frame from channel(s).
+    /// Create a new surround 7.1 interleaved audio frame from sample(s).
     #[inline(always)]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -761,8 +761,8 @@ impl<Samp: Sample, const COUNT: usize> Neg for Frame<Samp, COUNT> {
 
     #[inline(always)]
     fn neg(mut self) -> Self {
-        for chan in self.0.iter_mut() {
-            *chan = -*chan;
+        for samp in self.0.iter_mut() {
+            *samp = -*samp;
         }
         self
     }

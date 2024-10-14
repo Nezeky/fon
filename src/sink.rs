@@ -38,7 +38,8 @@ where
     _phantom: core::marker::PhantomData<fn() -> (Samp, S)>,
 }
 
-impl<Samp, S, K, const COUNT: usize, const N: usize> SinkTo<Samp, S, K, COUNT, N>
+impl<Samp, S, K, const COUNT: usize, const N: usize>
+    SinkTo<Samp, S, K, COUNT, N>
 where
     Samp: Sample + From<S>,
     S: Sample,

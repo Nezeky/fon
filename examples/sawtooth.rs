@@ -1,6 +1,6 @@
 use fon::{
-    samp::{Samp16, Samp32},
     pos::Mono,
+    samp::{Samp16, Samp32},
     Audio,
 };
 
