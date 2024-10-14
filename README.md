@@ -13,33 +13,48 @@ Rust audio types, resampling, converting, processing, and mixing library.
 Check out the [documentation][0] for examples.
 
 ### Goals
+
 - Fast audio conversion and resampling.
 - Standard audio types
 - Pure Rust
 
 ## See Also
+
 For audio synthesis, check out [twang][14].
 
 For audio recording and playback, check out [wavy][15].
 
+## MSRV
+
+The current MSRV is Rust 1.70.
+
+MSRV is updated according to the [Ardaku MSRV guidelines].
+
 ## License
+
+Copyright © 2020-2024 The Fon Crate Contributor(s)
+
 Licensed under any of
  - Apache License, Version 2.0, ([LICENSE_APACHE_2_0.txt][7]
    or [https://www.apache.org/licenses/LICENSE-2.0][8])
- - MIT License, ([LICENSE_MIT.txt][9] or [https://mit-license.org/][10])
  - Boost Software License, Version 1.0, ([LICENSE_BOOST_1_0.txt][11]
    or [https://www.boost.org/LICENSE_1_0.txt][12])
+ - MIT License, ([LICENSE_MIT.txt][9] or [https://mit-license.org/][10])
 
 at your option.
 
 ### Contribution
+
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 licensed as described above, without any additional terms or conditions.
 
 ## Help
+
 If you want help using or contributing to this library, feel free to send me an
 email at [aldaronlau@gmail.com][13].
+
+[Ardaku MSRV guidelines]: https://github.com/ardaku/.github/blob/v1/profile/MSRV.md
 
 [0]: https://docs.rs/fon
 [1]: https://crates.io/crates/fon
