@@ -10,8 +10,7 @@
 use alloc::{
     boxed::Box,
     slice::{Iter, IterMut},
-    vec,
-    vec::Vec,
+    vec::{self, Vec},
 };
 use core::{
     convert::TryInto, fmt::Debug, mem::size_of, num::NonZeroU32,

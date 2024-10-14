@@ -136,7 +136,7 @@ macro_rules! algo {
 }
 
 impl ResamplerState {
-    /* 
+    /*
      * * Resample a float array. The input and output buffers must *not*
      *   overlap.
      * @param st Resampler state
@@ -199,7 +199,7 @@ impl ResamplerState {
         }
     }
 
-    /* 
+    /*
      * * Make sure that the first samples to go out of the resamplers don't
      *   have
      * leading zeros. This is only useful before starting to use a newly
@@ -214,7 +214,7 @@ impl ResamplerState {
         self.last_sample = filt_len;
     }
 
-    /* 
+    /*
      * * Reset a resampler so a new (unrelated) stream can be processed.
      * @param st Resampler state
      */
