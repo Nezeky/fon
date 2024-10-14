@@ -63,11 +63,11 @@ email at [aldaronlau@gmail.com][13].
 [4]: https://github.com/ardaku/fon/
 [5]: https://docs.rs/fon#getting-started
 [6]: https://aldaronlau.com/
-[7]: https://github.com/ardaku/fon/blob/v1/LICENSE_APACHE_2_0.txt
+[7]: https://github.com/ardaku/fon/blob/v1/LICENSE_APACHE
 [8]: https://www.apache.org/licenses/LICENSE-2.0
-[9]: https://github.com/ardaku/fon/blob/v1/LICENSE_MIT.txt
+[9]: https://github.com/ardaku/fon/blob/v1/LICENSE_MIT
 [10]: https://mit-license.org/
-[11]: https://github.com/ardaku/fon/blob/v1/LICENSE_BOOST_1_0.txt
+[11]: https://github.com/ardaku/fon/blob/v1/LICENSE_BOOST
 [12]: https://www.boost.org/LICENSE_1_0.txt
 [13]: mailto:aldaronlau@gmail.com
 [14]: https://crates.io/crates/twang
