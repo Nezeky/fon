@@ -11,12 +11,14 @@
 //!
 //! An audio [`Frame`](crate::frame::Frame) is used to group multiple channels.
 
+use core::{
+    fmt::Debug,
+    ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+};
+
 #[cfg(not(test))]
 use crate::math::Libm;
-
 use crate::private::Sealed;
-use core::fmt::Debug;
-use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// Component of a speaker configuration, such as *front left*, *lfe*, *etc*.
 pub trait Channel:
@@ -71,9 +73,9 @@ pub trait Channel:
 pub struct Ch16(i16);
 
 impl Channel for Ch16 {
-    const MIN: Ch16 = Ch16(-32_768);
-    const MID: Ch16 = Ch16(0);
     const MAX: Ch16 = Ch16(32_767);
+    const MID: Ch16 = Ch16(0);
+    const MIN: Ch16 = Ch16(-32_768);
 
     #[inline(always)]
     fn to_f32(self) -> f32 {
@@ -170,9 +172,9 @@ impl Neg for Ch16 {
 pub struct Ch24(i16, u8);
 
 impl Channel for Ch24 {
-    const MIN: Ch24 = Ch24::new(-8_388_608);
-    const MID: Ch24 = Ch24::new(0);
     const MAX: Ch24 = Ch24::new(8_388_607);
+    const MID: Ch24 = Ch24::new(0);
+    const MIN: Ch24 = Ch24::new(-8_388_608);
 
     #[inline(always)]
     fn to_f32(self) -> f32 {
@@ -276,9 +278,9 @@ impl Neg for Ch24 {
 pub struct Ch32(f32);
 
 impl Channel for Ch32 {
-    const MIN: Ch32 = Ch32(-1.0);
-    const MID: Ch32 = Ch32(0.0);
     const MAX: Ch32 = Ch32(1.0);
+    const MID: Ch32 = Ch32(0.0);
+    const MIN: Ch32 = Ch32(-1.0);
 
     #[inline(always)]
     fn to_f32(self) -> f32 {
@@ -371,9 +373,9 @@ impl Neg for Ch32 {
 pub struct Ch64(f64);
 
 impl Channel for Ch64 {
-    const MIN: Ch64 = Ch64(-1.0);
-    const MID: Ch64 = Ch64(0.0);
     const MAX: Ch64 = Ch64(1.0);
+    const MID: Ch64 = Ch64(0.0);
+    const MIN: Ch64 = Ch64(-1.0);
 
     #[inline(always)]
     fn to_f32(self) -> f32 {

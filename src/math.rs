@@ -173,10 +173,9 @@ impl Libm for f64 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use core::{f32::consts::PI as PI_F32, f64::consts::PI as PI_F64};
 
-    use core::f32::consts::PI as PI_F32;
-    use core::f64::consts::PI as PI_F64;
+    use super::*;
 
     fn assert_approx_eq_f32(a: f32, b: f32) {
         if a != b {
@@ -207,14 +206,16 @@ mod tests {
     #[test]
     fn powi() {
         for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F64] {
-            //std implementation has slightly different results across platforms
+            //std implementation has slightly different results across
+            // platforms
             for i in -16..16 {
                 assert_approx_eq_f64(Libm::powi(x, i), f64::powi(x, i));
             }
         }
 
         for x in [0.0, 1.0, 1.5, -0.4, -1000.09301, 564.33333, PI_F32] {
-            //std implementation has slightly different results across platforms
+            //std implementation has slightly different results across
+            // platforms
             for i in -16..16 {
                 assert_approx_eq_f32(Libm::powi(x, i), f32::powi(x, i));
             }

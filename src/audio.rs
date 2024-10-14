@@ -7,20 +7,24 @@
 // At your choosing (See accompanying files LICENSE_APACHE_2_0.txt,
 // LICENSE_MIT.txt and LICENSE_BOOST_1_0.txt).
 
+use alloc::{
+    boxed::Box,
+    slice::{Iter, IterMut},
+    vec,
+    vec::Vec,
+};
+use core::{
+    convert::TryInto, fmt::Debug, mem::size_of, num::NonZeroU32,
+    slice::from_raw_parts_mut,
+};
+
 #[cfg(not(test))]
 use crate::math::Libm;
-
-use crate::chan::{Ch16, Ch24, Ch32, Ch64, Channel};
-use crate::frame::Frame;
-use crate::{Sink, Stream};
-
-use alloc::boxed::Box;
-use alloc::slice::{Iter, IterMut};
-use alloc::{vec, vec::Vec};
-
-use core::convert::TryInto;
-use core::num::NonZeroU32;
-use core::{fmt::Debug, mem::size_of, slice::from_raw_parts_mut};
+use crate::{
+    chan::{Ch16, Ch24, Ch32, Ch64, Channel},
+    frame::Frame,
+    Sink, Stream,
+};
 
 /// Audio buffer (fixed-size array of audio [`Frame`](crate::frame::Frame)s at
 /// sample rate specified in hertz).

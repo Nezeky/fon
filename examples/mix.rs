@@ -1,10 +1,11 @@
 // Audio mixing example
 
+use std::num::NonZeroU32;
+
 use fon::{
     chan::{Ch32, Channel},
     Audio, Frame, Sink, Stream,
 };
-use std::num::NonZeroU32;
 
 #[derive(Debug)]
 pub struct Mixer<'a, Chan: Channel, const CH: usize> {

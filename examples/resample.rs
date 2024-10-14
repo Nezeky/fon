@@ -1,7 +1,6 @@
 use std::convert::TryInto;
 
-use fon::chan::Ch32;
-use fon::Audio;
+use fon::{chan::Ch32, Audio};
 
 // Resample an audio file from one sample rate to another.
 fn resample(in_hz: u32, in_file: &str, out_hz: u32, out_file: &str) {

@@ -9,13 +9,15 @@
 
 //! Frame (interleaved sample) types
 
-#[cfg(not(test))]
-use crate::math::Libm;
+use core::{
+    f32::consts::FRAC_PI_2,
+    fmt::Debug,
+    ops::{Add, Mul, Neg, Sub},
+};
 
 use crate::chan::Channel;
-use core::f32::consts::FRAC_PI_2;
-use core::fmt::Debug;
-use core::ops::{Add, Mul, Neg, Sub};
+#[cfg(not(test))]
+use crate::math::Libm;
 
 /// Frame - A number of interleaved sample [channel]s.
 ///
